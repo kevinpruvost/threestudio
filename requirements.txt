@@ -1,4 +1,4 @@
-lightning==2.0.0
+lightning==2.1.3
 omegaconf==2.3.0
 jaxtyping
 typeguard
@@ -39,3 +39,6 @@ git+https://github.com/openai/CLIP.git
 
 #controlnet
 controlnet_aux
+
+mediapipe
+triton

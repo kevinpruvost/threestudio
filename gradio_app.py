@@ -194,7 +194,7 @@ def run(
     status_update_interval = 1
 
     # save the config to a temporary file
-    config_file = tempfile.NamedTemporaryFile()
+    config_file = tempfile.NamedTemporaryFile(delete=False)
 
     with open(config_file.name, "w") as f:
         f.write(config)
@@ -451,7 +451,7 @@ def launch(
             queue=False,
         )
 
-    launch_args = {"server_port": port}
+    launch_args = {"server_port": port, "share": True}
     if listen:
         launch_args["server_name"] = "0.0.0.0"
     demo.queue().launch(**launch_args)
