@@ -7,6 +7,7 @@ import sys
 import time
 import traceback
 
+os.environ['CURL_CA_BUNDLE'] = ''
 
 class ColoredFilter(logging.Filter):
     """

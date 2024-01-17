@@ -14,6 +14,7 @@ import gradio as gr
 import numpy as np
 import psutil
 import trimesh
+import json
 
 from threestudio.utils.config import load_config
 from threestudio.utils.typing import *
@@ -75,12 +76,13 @@ class ExperimentStatus:
 EXP_ROOT_DIR = "outputs-gradio"
 DEFAULT_PROMPT = "a delicious hamburger"
 model_name_config = [
+    ("Latent-NeRF (Stable Diffusion)", "configs/gradio/latentnerf.yaml"),
     ("SJC (Stable Diffusion)", "configs/gradio/sjc.yaml"),
     ("DreamFusion (DeepFloyd-IF)", "configs/gradio/dreamfusion-if.yaml"),
     ("DreamFusion (Stable Diffusion)", "configs/gradio/dreamfusion-sd.yaml"),
     ("TextMesh (DeepFloyd-IF)", "configs/gradio/textmesh-if.yaml"),
-    ("Latent-NeRF (Stable Diffusion)", "configs/gradio/latentnerf.yaml"),
     ("Fantasia3D (Stable Diffusion, Geometry Only)", "configs/gradio/fantasia3d.yaml"),
+    ("ProlificDreamer", "configs/gradio/prolificdreamer.yaml"),
 ]
 model_list = [m[0] for m in model_name_config]
 model_config: Dict[str, Dict[str, Any]] = {}
@@ -207,6 +209,11 @@ def run(
 
     # spawn the training process
     gpu = os.environ.get("CUDA_VISIBLE_DEVICES", "0")
+
+    start_time = time.time()
+
+    print(f"name = {name}")
+
     process = subprocess.Popen(
         f"python launch.py --config {config_file.name} --train --gpu {gpu} --gradio trainer.enable_progress_bar=false".split()
         + [
@@ -242,6 +249,21 @@ def run(
     # wait for the processes to finish
     process.wait()
     watch_process.wait()
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Process {process.pid} finished in {elapsed_time} seconds.")
+
+    # Write the result to a JSON file
+    try:
+        with open("./times.json", "r+") as json_file:
+            res = json.load(json_file)
+            res[f"{name}_seconds"] = elapsed_time
+            json_file.seek(0)
+            json.dump(res, json_file)
+    except:
+        with open("./times.json", "w") as json_file:
+            json.dump({f"{name}_seconds": elapsed_time}, json_file)
 
     # update status one last time
     # button status: Stop / Reset -> Run
